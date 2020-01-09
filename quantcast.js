@@ -8,7 +8,7 @@ function storage () {
   this.fields = {
     vals: [],
     valMap: {},
-    children: []
+    children: {}
   }
 }
 
@@ -38,13 +38,13 @@ storage.prototype.addFields = function(cur, input) {
           valMap: {
             [count]: field[1]
           },
-          children: []
+          children: {}
         }
       } else {
         cur.children[field[0]] = {
           vals: [],
           valMap: {},
-          children: []
+          children: {}
         }
         console.log(cur.children[field[0]])
         self.addFields(cur.children[field[0]], field[1])
@@ -56,20 +56,20 @@ storage.prototype.addFields = function(cur, input) {
 let match = (pool, fields, input, map) => {
   Object.entries(input).forEach(entry => {
     if (typeof entry[1] === 'object') {
-      // pool = match(pool, )
+      pool = match(pool, fields.children[entry[0]], entry[1], map)
     } else if (typeof entry[1] === 'array') {
-      for (let i = 0; i < pool.length; i++) {
-        let arr1 = fields.children[entry[0]].vals.slice()
-        arr1 = arr1.map(a => {return fields.children[entry[0]].valMap[a]})
-        let arr2 = entry[1]
-        if ()
+      // for (let i = 0; i < pool.length; i++) {
+      //   let arr1 = fields.children[entry[0]].vals.slice()
+      //   arr1 = arr1.map(a => {return fields.children[entry[0]].valMap[a]})
+      //   let arr2 = entry[1]
+      //   if ()
           
-        }
-      }
+      //   }
+      // }
     } else {
       for (let i = 0; i < pool.length; i++) {
         if (fields.children[entry[0]].valMap[pool[i]] !== entry[1]) {
-          pool.slice(i, 1)
+          pool.splice(i, 1)
           i--
         }
       }
@@ -88,6 +88,7 @@ storage.prototype.get = function(input) {
     ret.push(self.data[m])
   })  
 
+  console.log(ret)
   return ret
 }
 
@@ -104,5 +105,14 @@ s.add({"id":4,"last":"Frost","first":"Jack","location":{"city":"Seattle","state"
 // console.log('CITY', s.fields.children['location'].children['city'])
 // console.log('STATE', s.fields.children['location'].children['state'])
 // console.log('POSTAL', s.fields.children['location'].children['postalCode'])
-s.get({})
+s.get({
+  "location": {
+    "state": "WA"
+  },
+  "active": true
+})
+
+s.get({
+  "id": 1
+})
 
