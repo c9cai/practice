@@ -1,6 +1,4 @@
 //quantcast
-
-
 function storage () {
   this.data = {}
   this.count = 0
@@ -24,15 +22,16 @@ storage.prototype.addFields = function(cur, input) {
   let self = this
   let count = this.count
   Object.entries(input).forEach(field => {
+    console.log(typeof field[1], field[1])
     if (cur.children[field[0]]) {
-      if (typeof field[1] !== 'object') {
+      if (typeof field[1] !== 'object' || Array.isArray(field[1])) {
         cur.children[field[0]].vals.push(count)
         cur.children[field[0]].valMap[count] = field[1]
       } else {
         self.addFields(cur.children[field[0]], field[1])
       }  
     } else {  
-      if (typeof field[1] !== 'object') {
+      if (typeof field[1] !== 'object' || Array.isArray(field[1])) {
         cur.children[field[0]] = {
           vals: [count],
           valMap: {
@@ -46,7 +45,6 @@ storage.prototype.addFields = function(cur, input) {
           valMap: {},
           children: {}
         }
-        console.log(cur.children[field[0]])
         self.addFields(cur.children[field[0]], field[1])
       }
     }
@@ -58,14 +56,11 @@ let match = (pool, fields, input, map) => {
     if (typeof entry[1] === 'object') {
       pool = match(pool, fields.children[entry[0]], entry[1], map)
     } else if (typeof entry[1] === 'array') {
-      // for (let i = 0; i < pool.length; i++) {
-      //   let arr1 = fields.children[entry[0]].vals.slice()
-      //   arr1 = arr1.map(a => {return fields.children[entry[0]].valMap[a]})
-      //   let arr2 = entry[1]
-      //   if ()
-          
-      //   }
-      // }
+      for (let i = 0; i < pool.length; i++) {
+        let arr1 = fields.children[entry[0]].vals.slice()
+        arr1 = arr1.map(a => {return fields.children[entry[0]].valMap[a]})
+        let arr2 = entry[1]
+      }
     } else {
       for (let i = 0; i < pool.length; i++) {
         if (fields.children[entry[0]].valMap[pool[i]] !== entry[1]) {
@@ -78,7 +73,6 @@ let match = (pool, fields, input, map) => {
 
   return pool
 }
-
 
 storage.prototype.get = function(input) {
   let ret = []
@@ -94,10 +88,10 @@ storage.prototype.get = function(input) {
 
 
 let s = new storage()
-s.add({"id":1,"last":"Doe","first":"John","location":{"city":"Oakland","state":"CA","postalCode":"94607"},"active":true})
-s.add({"id":2,"last":"Doe","first":"Jane","location":{"city":"San Francisco","state":"CA","postalCode":"94105"},"active":true})
-s.add({"id":3,"last":"Black","first":"Jim","location":{"city":"Spokane","state":"WA","postalCode":"99207"},"active":true})
-s.add({"id":4,"last":"Frost","first":"Jack","location":{"city":"Seattle","state":"WA","postalCode":"98204"},"active":false})
+// s.add({"id":1,"last":"Doe","first":"John","location":{"city":"Oakland","state":"CA","postalCode":"94607"},"active":true})
+// s.add({"id":2,"last":"Doe","first":"Jane","location":{"city":"San Francisco","state":"CA","postalCode":"94105"},"active":true})
+// s.add({"id":3,"last":"Black","first":"Jim","location":{"city":"Spokane","state":"WA","postalCode":"99207"},"active":true})
+// s.add({"id":4,"last":"Frost","first":"Jack","location":{"city":"Seattle","state":"WA","postalCode":"98204"},"active":false})
 // console.log(s.data)
 // console.log(s.fields)
 // console.log('ID', s.fields.children['id'])
@@ -105,14 +99,21 @@ s.add({"id":4,"last":"Frost","first":"Jack","location":{"city":"Seattle","state"
 // console.log('CITY', s.fields.children['location'].children['city'])
 // console.log('STATE', s.fields.children['location'].children['state'])
 // console.log('POSTAL', s.fields.children['location'].children['postalCode'])
-s.get({
-  "location": {
-    "state": "WA"
-  },
-  "active": true
-})
+// s.get({
+//   "location": {
+//     "state": "WA"
+//   },
+//   "active": true
+// })
 
-s.get({
-  "id": 1
-})
+// s.get({
+//   "id": 1
+// })
 
+s.add({"type":"list","list":[2,3,4,5]})
+s.add({"type":"list","list":[3,4,5,6]})
+s.add({"type":"list","list":[4,5,6,7]})
+s.add({"type":"list","list":[5,6,7,8]})
+s.add({"type":"list","list":[6,7,8,9]})
+
+console.log(s.fields.children)
