@@ -1,0 +1,46 @@
+       11
+     /  | \
+   1   1 1
+  / | \
+1  1 2
+
+Node {
+	This.val = null
+	This.children = []
+}
+
+Value: parent
+11:null, 1:0, 1:0, 1:0, 1:1, 1:1, 2:1
+
+       11
+     /  | \
+   1   1 1
+  /      |   \
+1       1  2
+
+11:null, 1:0, 1:0, 1:0, 1:1, 1:2, 2:3
+
+Node {
+	This.val = null
+	This.children = []
+}
+
+
+const reconstruct(input) => {
+	Let arr = input.split(‘,’)
+
+Let root = new Node(arr.split(‘;’)[0])	
+
+	Let treeArr = [root]
+
+	for (let i = 1; i < arr.length; i++) {
+Let parent = node.split(‘:’)[1]
+Let val = node.split(‘:’)[0]
+	
+Let temp = new Node(val)
+treeArr[parent].children.push(temp)
+treeArr.push(temp)	
+}
+
+Return treeArr[0]
+}
