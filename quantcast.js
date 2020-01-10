@@ -1,4 +1,3 @@
-//quantcast
 function storage () {
   this.data = {}
   this.count = 0
@@ -50,21 +49,35 @@ storage.prototype.addFields = function(cur, input) {
   }) 
 }
 
-let match = (pool, fields, input, map) => {
+let match = (pool, fields, input) => {
   Object.entries(input).forEach(entry => {
+    if (fields.children[entry[0]] === undefined) return
+
     if (Array.isArray(entry[1])) {
       for (let i = 0; i < pool.length; i++) {
         let arr1 = fields.children[entry[0]].valMap[pool[i]].slice()
         let arr2 = entry[1]
-        // console.log(arr1)
-        // console.log(arr2)
-        if (!arr2.every(val => arr1.includes(val))) {
-          pool.splice(i, 1)
-          i--
+
+        let arr1Map = {}, arr2Map = {}
+        arr1.forEach(e => {
+          arr1Map[e] = (arr1Map[e] === undefined) ? 1 : arr1Map[e] + 1 
+        })
+        arr2.forEach(e => {
+          arr2Map[e] = (arr2Map[e] === undefined) ? 1 : arr2Map[e] + 1 
+        })
+        console.log(arr1Map, arr2Map)
+
+        arr2 = Object.entries(arr2Map)
+        for (let x = 0; x < arr2.length; x++) {
+          if (arr2[x][1] > arr1Map[arr2[x][0]] || arr1Map[arr2[x][0]] === undefined) {
+            pool.splice(i, 1)
+            i--
+            break
+          }
         }
       }
     } else if (typeof entry[1] === 'object') {
-      pool = match(pool, fields.children[entry[0]], entry[1], map)
+      pool = match(pool, fields.children[entry[0]], entry[1])
     } else {
       for (let i = 0; i < pool.length; i++) {
         if (fields.children[entry[0]].valMap[pool[i]] !== entry[1]) {
@@ -82,7 +95,7 @@ storage.prototype.get = function(input) {
   let ret = []
   let self = this
   let pool = [...Object.keys(this.data)]
-  match(pool, self.fields, input, self.data).forEach(m => {
+  match(pool, self.fields, input).forEach(m => {
     ret.push(self.data[m])
   })  
 
@@ -94,16 +107,17 @@ storage.prototype.delete = function(input) {
   let ret = []
   let self = this
   let pool = [...Object.keys(this.data)]
-  match(pool, self.fields, input, self.data).forEach(m => {
+  match(pool, self.fields, input).forEach(m => {
     delete self.data[m]
   })  
 }
 
+
 let s = new storage()
-// s.add({"id":1,"last":"Doe","first":"John","location":{"city":"Oakland","state":"CA","postalCode":"94607"},"active":true})
-// s.add({"id":2,"last":"Doe","first":"Jane","location":{"city":"San Francisco","state":"CA","postalCode":"94105"},"active":true})
-// s.add({"id":3,"last":"Black","first":"Jim","location":{"city":"Spokane","state":"WA","postalCode":"99207"},"active":true})
-// s.add({"id":4,"last":"Frost","first":"Jack","location":{"city":"Seattle","state":"WA","postalCode":"98204"},"active":false})
+s.add({"id":1,"last":"Doe","first":"John","location":{"city":"Oakland","state":"CA","postalCode":"94607"},"active":true})
+s.add({"id":2,"last":"Doe","first":"Jane","location":{"city":"San Francisco","state":"CA","postalCode":"94105"},"active":true})
+s.add({"id":3,"last":"Black","first":"Jim","location":{"city":"Spokane","state":"WA","postalCode":"99207"},"active":true})
+s.add({"id":4,"last":"Frost","first":"Jack","location":{"city":"Seattle","state":"WA","postalCode":"98204"},"active":false})
 // console.log(s.data)
 // console.log(s.fields)
 // console.log('ID', s.fields.children['id'])
@@ -113,7 +127,10 @@ let s = new storage()
 // console.log('POSTAL', s.fields.children['location'].children['postalCode'])
 // s.get({
 //   "location": {
-//     "state": "WA"
+//     "state": "WA",
+//     "art": {
+//       "bk": true
+//     }
 //   },
 //   "active": true
 // })
@@ -126,7 +143,7 @@ let s = new storage()
 //   "id": 1
 // })
 
-// console.log(s.data)
+// // console.log(s.data)
 
 // s.get({
 //   "id": 1
